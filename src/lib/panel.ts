@@ -493,6 +493,10 @@ function emailBlocks(prep: Prepared, status: string | undefined): Block[] {
         blocks.push(banner(blockers.join(" "), "alert", "This email cannot be sent yet"));
     }
     for (const warning of prep.render.warnings) blocks.push(banner(warning, "default"));
+    blocks.push({
+        type: "context",
+        text: "Emails are built for modern email clients. Classic Outlook for Windows (the Word rendering engine) is not supported and may display them incorrectly.",
+    });
     return blocks;
 }
 

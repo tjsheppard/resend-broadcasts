@@ -55,7 +55,9 @@ sent again if re-published.
 ## Limits
 
 - Body rendering supports paragraphs, headings, lists (nested), quotes, links, images, rules and
-  basic marks. Other blocks are left out and flagged as a warning before approval.
+  basic marks. Left- and right-aligned images wrap the text beside them on desktop and stack on mobile. Other blocks are left out and flagged as a warning before approval.
+- Emails target modern email clients. Classic Outlook for Windows (the Word rendering engine) is
+  not supported and may show images at full size and ignore layout; the panel says so too.
 - Resend's API is limited to 2 requests/second; segments and topics are cached for 10 minutes.
 - The panel is a Block Kit form, so it cannot render the HTML email; send a test email to see it.
 - Only users with publish rights can use the panel; only admins can change settings.

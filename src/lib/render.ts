@@ -65,6 +65,8 @@ interface PtBlock {
     caption?: string;
     width?: number;
     height?: number;
+    displayWidth?: number;
+    alignment?: string;
 }
 
 export function escapeHtml(value: string): string {
@@ -255,16 +257,11 @@ function renderBody(value: unknown, siteUrl: string, theme: Theme, stopAtUnsuppo
             }
             const alt = typeof block.alt === "string" ? block.alt : "";
             const caption = typeof block.caption === "string" ? block.caption : "";
-            htmlParts.push(
-                `<p style="margin:0 0 16px;"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" style="display:block;max-width:100%;height:auto;border:0;border-radius:4px;">${caption
-                    ? `<span class="em-muted" style="display:block;margin-top:6px;${F}font-size:13px;color:${theme.muted};">${escapeHtml(caption)}</span>`
-                    : ""
-                }</p>`,
-            );
+            htmlParts.push(renderImage(block, src, alt, caption, theme));
             textParts.push(alt ? `[Image: ${alt}]` : "[Image]");
             result.hasContent = true;
         } else if (block._type === "break") {
-            htmlParts.push(`<hr class="em-rule" style="border:0;border-top:1px solid ${theme.rule};margin:24px 0;">`);
+            htmlParts.push(`<hr class="em-rule" style="clear:both;border:0;border-top:1px solid ${theme.rule};margin:24px 0;">`);
             textParts.push("---");
         } else {
             result.skipped.push(String(block._type ?? "unknown"));
@@ -275,9 +272,37 @@ function renderBody(value: unknown, siteUrl: string, theme: Theme, stopAtUnsuppo
         }
     }
 
-    result.html = htmlParts.join("\n");
+    result.html = `${htmlParts.join("\n")}\n<div style="clear:both;"></div>`;
     result.text = textParts.join("\n\n");
     return result;
+}
+
+const FLOAT_DEFAULT_WIDTH = 240;
+const FLOAT_MAX_WIDTH = 268;
+
+function positiveNumber(value: unknown): number | null {
+    return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.round(value) : null;
+}
+
+/** Left/right images float so text wraps beside them on desktop; .em-float lets mobile stack them. */
+function renderImage(block: PtBlock, src: string, alt: string, caption: string, theme: Theme): string {
+    const img = `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" style="display:block;width:100%;max-width:100%;height:auto;border:0;border-radius:4px;">`;
+    const captionHtml = caption
+        ? `<span class="em-muted" style="display:block;margin-top:6px;${F}font-size:13px;color:${theme.muted};">${escapeHtml(caption)}</span>`
+        : "";
+    const requested = positiveNumber(block.displayWidth) ?? positiveNumber(block.width);
+    const alignment = block.alignment;
+
+    if (alignment === "left" || alignment === "right") {
+        const width = Math.min(requested ?? FLOAT_DEFAULT_WIDTH, FLOAT_MAX_WIDTH);
+        const side = alignment === "left" ? "margin:4px 20px 12px 0;" : "margin:4px 0 12px 20px;";
+        return `<div class="em-float" style="float:${alignment};width:${width}px;max-width:50%;${side}">${img}${captionHtml}</div>`;
+    }
+    if (alignment === "center") {
+        const width = requested ? `${Math.min(requested, 536)}px` : "100%";
+        return `<div style="clear:both;width:${width};max-width:100%;margin:0 auto 16px;">${img}${captionHtml}</div>`;
+    }
+    return `<div style="clear:both;margin:0 0 16px;">${img}${captionHtml}</div>`;
 }
 
 function truncate(text: string, maxLength: number): string {
@@ -300,8 +325,7 @@ export function firstSentence(text: string, maxLength = 110): string {
 }
 
 function button(label: string, href: string, theme: Theme): string {
-    // The MSO spacers and mso-* properties give Outlook (Word renderer) the padding it ignores on links.
-    return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 16px;"><tr><td bgcolor="${theme.accent}" style="background:${theme.accent};border-radius:6px;"><a href="${escapeHtml(href)}" style="display:inline-block;line-height:100%;padding:12px 22px;mso-padding-alt:0;${F}font-size:16px;font-weight:600;color:${theme.onAccent};text-decoration:none;"><!--[if mso]><i style="letter-spacing:22px;mso-font-width:-100%;mso-text-raise:18pt" hidden>&nbsp;</i><![endif]--><span style="display:inline-block;line-height:120%;mso-text-raise:9pt;">${escapeHtml(label)}</span><!--[if mso]><i style="letter-spacing:22px;mso-font-width:-100%" hidden>&nbsp;</i><![endif]--></a></td></tr></table>`;
+    return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 16px;"><tr><td bgcolor="${theme.accent}" style="background:${theme.accent};border-radius:6px;"><a href="${escapeHtml(href)}" style="display:inline-block;padding:12px 22px;${F}font-size:16px;font-weight:600;color:${theme.onAccent};text-decoration:none;">${escapeHtml(label)}</a></td></tr></table>`;
 }
 
 function darkModeCss(t: Theme): string {
@@ -360,7 +384,7 @@ export function renderEmail(input: RenderInput): RenderResult {
             : "";
 
     const hiddenPreheader = input.preheader
-        ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;">${escapeHtml(input.preheader)}${"&zwnj;&nbsp;".repeat(30)}</div>`
+        ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(input.preheader)}${"&zwnj;&nbsp;".repeat(30)}</div>`
         : "";
 
     const siteLink = safeUrl(siteUrl, siteUrl);
@@ -407,9 +431,11 @@ export function renderEmail(input: RenderInput): RenderResult {
 <meta name="supported-color-schemes" content="light dark">
 <meta name="x-apple-disable-message-reformatting">
 <title>${escapeHtml(input.subject)}</title>
-<!--[if mso]><style>td,th,p,h1,h2,h3,h4,li,a,span{font-family:Arial,sans-serif!important}</style><![endif]-->
 <style>
 ${darkModeCss(theme)}
+@media (max-width:480px){
+.em-float{float:none!important;width:100%!important;max-width:100%!important;margin:0 0 16px!important}
+}
 </style>
 </head>
 <body class="em-bg" style="margin:0;padding:0;background:${theme.page};${F}">

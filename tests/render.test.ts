@@ -80,6 +80,29 @@ describe("renderEmail", () => {
         expect(result.errors).toEqual([]);
     });
 
+    it("floats left and right images so text wraps beside them, and lets mobile stack them", () => {
+        const { html } = render([
+            { _type: "image", url: "/a.png", alt: "A", alignment: "left", displayWidth: 200, caption: "Cap" },
+            block([span("wraps")]),
+            { _type: "image", url: "/b.png", alt: "B", alignment: "right", width: 900 },
+        ]);
+        expect(html).toContain('class="em-float" style="float:left;width:200px;max-width:50%;margin:4px 20px 12px 0;"');
+        expect(html).toContain('class="em-float" style="float:right;width:268px;max-width:50%;margin:4px 0 12px 20px;"');
+        expect(html).toContain("Cap");
+        expect(html).toContain("@media (max-width:480px)");
+        expect(html).toContain(".em-float{float:none!important");
+    });
+
+    it("centres and clears non-floated images", () => {
+        const { html } = render([
+            { _type: "image", url: "/c.png", alignment: "center", displayWidth: 300 },
+            { _type: "image", url: "/d.png", alignment: "wide" },
+        ]);
+        expect(html).toContain("clear:both;width:300px;max-width:100%;margin:0 auto 16px;");
+        expect(html).toContain('<div style="clear:both;margin:0 0 16px;"><img src="https://example.com/d.png"');
+        expect(html).not.toContain('style="float:');
+    });
+
     it("blocks approval for an empty body, empty subject or a missing title", () => {
         expect(render([]).errors.join(" ")).toContain("no body content");
         expect(render([block([span("x")])], { title: "" }).errors.join(" ")).toContain("no title");
@@ -221,12 +244,11 @@ describe("template options", () => {
         expect(html).toContain("color:#155dfc;text-decoration:underline");
     });
 
-    it("includes dark-mode styles, the colour-scheme meta tags and an Outlook-safe button", () => {
+    it("includes dark-mode styles, the colour-scheme meta tags and no Outlook-only markup", () => {
         const { html } = renderEmail(input({ fields: { title: "Hello", excerpt: "", body: [{ _type: "embed" }] } }));
         expect(html).toContain('<meta name="color-scheme" content="light dark">');
         expect(html).toContain("@media (prefers-color-scheme:dark)");
-        expect(html).toContain("mso-padding-alt:0");
-        expect(html).toContain("<!--[if mso]>");
+        expect(html).not.toContain("mso");
     });
 
     it("replaces the default footer line with the custom message, escaped", () => {

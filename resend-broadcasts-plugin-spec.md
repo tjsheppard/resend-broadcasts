@@ -252,7 +252,7 @@ Whichever is chosen, keep the rendering, state machine and Resend client in plai
 - A segment is required before approval or sending; the topic is optional.
 - Choosing a topic excludes contacts who opted out of that topic; leaving it empty sends to the whole segment, with the caveat visible.
 - Contacts marked unsubscribed (including via the website flow) receive nothing.
-- Every sent email contains a working Resend unsubscribe link and renders correctly in Gmail, Apple Mail and Outlook for text, headings, lists, quotes, links and images.
+- Every sent email contains a working Resend unsubscribe link and renders correctly in Gmail, Apple Mail and modern Outlook (classic Outlook for Windows is out of scope) for text, headings, lists, quotes, links and images.
 - A bad, missing or restricted API key produces a clear message and never a silent failure or partial send.
 - Two simultaneous send attempts result in one broadcast.
 - Publishing, scheduling and unpublishing entries work exactly as before when the plugin is disabled or unconfigured.
