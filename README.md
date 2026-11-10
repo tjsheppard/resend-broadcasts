@@ -20,8 +20,8 @@ reviewed and approved the exact email. Unofficial; not affiliated with Resend.
 - Choose segment, optional topic, subject and preview text (leave either empty to use the default shown
   in grey) and press **Save subject and preview text**. They appear in the inbox list only; switch on
   **Show subject and preview text at the top of the email** to also put them at the top of the body
-  (the subject as a heading, the preview text beneath it). The panel shows the plain-text and HTML
-  source; use **Send test email** to see the real email in your inbox. The full entry is always sent; at the first block that cannot be
+  (the subject as a heading, the preview text beneath it). Use **Send test email** to see the real
+  email in your inbox. The full entry is always sent; at the first block that cannot be
   rendered in email (embeds, custom components) the email stops and shows a **Continue reading on
   the web** button.
 - Scheduled entry: **Schedule broadcast**. The email sends when the scheduler publishes the entry.

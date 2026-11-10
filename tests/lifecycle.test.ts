@@ -220,7 +220,11 @@ describe("approval and sending", () => {
 		await savePanel(id);
 		const panel = JSON.stringify(await host.admin.loadEditorPanel(PANEL, "posts", id));
 		expect(panel).toContain('"action_id":"approve"');
-		expect(panel).toContain("https://example.com/posts/");
+
+		await host.http.respond("https://api.resend.com/emails", json({ id: "em_1" }));
+		await host.admin.submitEditorPanel(PANEL, "posts", id, "test_email", { test_to: "someone@example.com" });
+		const sent = host.http.requests().filter((r) => r.url === "https://api.resend.com/emails");
+		expect(JSON.parse(new TextDecoder().decode(sent[0].body)).html).toContain("https://example.com/posts/");
 	});
 
 	it("sends a test email for a draft with no segment chosen", async () => {

@@ -459,13 +459,6 @@ function contentForm(prep: Prepared): Block {
     };
 }
 
-// Block Kit rejects strings over 64 KB, so long sources are cut.
-const CODE_LIMIT = 20_000;
-
-function clip(value: string, max: number): string {
-    return value.length > max ? `${value.slice(0, max)}\n…` : value;
-}
-
 function emailBlocks(prep: Prepared, status: string | undefined): Block[] {
     const blocks: Block[] = [];
     const isLive = status === "published" || status === "scheduled";
@@ -476,14 +469,6 @@ function emailBlocks(prep: Prepared, status: string | undefined): Block[] {
     }
     for (const warning of prep.render.warnings) blocks.push(banner(warning, "default"));
     blocks.push({ type: "context", text: "To see how the email looks, send yourself a test email." });
-    blocks.push({
-        type: "tab",
-        block_id: "email_source",
-        panels: [
-            { label: "Plain text", blocks: [{ type: "code", code: clip(prep.render.text, CODE_LIMIT) }] },
-            { label: "HTML", blocks: [{ type: "code", code: clip(prep.render.html, CODE_LIMIT) }] },
-        ],
-    });
     return blocks;
 }
 
