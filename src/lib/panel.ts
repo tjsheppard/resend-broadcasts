@@ -1,6 +1,6 @@
 import type { Block, BlockResponse } from "@emdash-cms/blocks";
 import type { PluginContext, SandboxedRouteContext } from "emdash/plugin";
-import { content } from "./ctx.js";
+import { content, frugal } from "./ctx.js";
 import { toEntry } from "./fields.js";
 import { prepare, resolveAudience, type Prepared } from "./prepare.js";
 import { describeResendError, type ResendClient } from "./resend.js";
@@ -66,8 +66,9 @@ async function fetchLists(
 
 export async function handlePanel(
     routeCtx: SandboxedRouteContext,
-    ctx: PluginContext,
+    rawCtx: PluginContext,
 ): Promise<BlockResponse> {
+    const ctx = frugal(rawCtx);
     const ref = routeCtx.ui?.entry;
     if (!ref) return { blocks: [banner("Open this panel from a saved entry.", "alert")] };
 

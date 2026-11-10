@@ -1,7 +1,7 @@
 import type { Block, BlockResponse } from "@emdash-cms/blocks";
 import type { CollectionSchemaInfo, StorageCollection } from "emdash";
 import type { PluginContext, SandboxedRouteContext } from "emdash/plugin";
-import { content, schema } from "./ctx.js";
+import { content, frugal, schema } from "./ctx.js";
 import { toEntry, FIELD_ROLES, resolveFieldMap, ROLE_LABELS, typesForRole } from "./fields.js";
 import { ACCENT_OPTIONS, BASE_OPTIONS, isAccentColor, isBaseColor } from "./palette.js";
 import { describeResendError } from "./resend.js";
@@ -43,8 +43,9 @@ const MAPPING_ACTION = "save_mapping:";
 
 export async function handleAdmin(
     routeCtx: SandboxedRouteContext,
-    ctx: PluginContext,
+    rawCtx: PluginContext,
 ): Promise<BlockResponse> {
+    const ctx = frugal(rawCtx);
     const input: AdminInput =
         routeCtx.input && typeof routeCtx.input === "object" ? (routeCtx.input as AdminInput) : {};
     const isAdmin = (routeCtx.user?.role ?? 0) >= ADMIN_ROLE;

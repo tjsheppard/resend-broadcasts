@@ -23,7 +23,7 @@ The project isn't a git repository yet and has no GitHub remote, so that comes f
 
 ## 4. Versioning and automated releases
 
-- `package.json` is the only version source, currently 0.3.1. Bump patch for fixes and minor for new features. You must bump it whenever capabilities, `allowedHosts` or storage change.
+- `package.json` is the only version source, currently 0.3.2. Bump patch for fixes and minor for new features. You must bump it whenever capabilities, `allowedHosts` or storage change.
 - For CI releases, run `pnpm run release:setup` after the repo is on GitHub. It writes `.github/workflows/emdash-release.yml`. Pick either trigger: Changesets (changelog and version PRs) or git tags.
 - Before the first release, open https://releases.emdashcms.com/publisher, sign in as `shepp.dev` and select **Authorize publishing**. Without it the workflow fails with `DELEGATION_REQUIRED`.
 - Tags suit a single-package plugin. Bump the version in a PR, merge it, then push a `resend-broadcasts@0.3.0` tag (`<slug>@<version>`; the workflow ignores `v0.3.0`) and the workflow publishes. The first automated release connects the repo to your publisher profile.
