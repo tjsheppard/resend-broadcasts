@@ -12,37 +12,22 @@ import type {
 const AUDIENCE_TTL_MS = 10 * 60 * 1000;
 
 export async function loadSettings(ctx: PluginContext): Promise<Settings> {
-    const [
-        apiKey,
-        enabledCollections,
-        fieldMaps,
-        defaultSegmentId,
-        defaultTopicId,
-        fromAddress,
-        replyTo,
-        siteUrl,
-        logoUrl,
-        senderAddress,
-        accentColor,
-        baseColor,
-        footerText,
-        showReadOnline,
-    ] = await Promise.all([
-        ctx.settings.get<string>("apiKey"),
-        ctx.settings.get<string[]>("enabledCollections"),
-        ctx.settings.get<Record<string, FieldMap>>("fieldMaps"),
-        ctx.settings.get<string>("defaultSegmentId"),
-        ctx.settings.get<string>("defaultTopicId"),
-        ctx.settings.get<string>("fromAddress"),
-        ctx.settings.get<string>("replyTo"),
-        ctx.settings.get<string>("siteUrl"),
-        ctx.settings.get<string>("logoUrl"),
-        ctx.settings.get<string>("senderAddress"),
-        ctx.settings.get<string>("accentColor"),
-        ctx.settings.get<string>("baseColor"),
-        ctx.settings.get<string>("footerText"),
-        ctx.settings.get<boolean>("showReadOnline"),
-    ]);
+    // One list() call instead of a get per key keeps a page load well under the sandbox's 30 bridge calls.
+    const [apiKey, all] = await Promise.all([ctx.settings.get<string>("apiKey"), ctx.settings.list()]);
+    const stored = new Map(all.map((item) => [item.key, item.value]));
+    const enabledCollections = stored.get("enabledCollections");
+    const fieldMaps = stored.get("fieldMaps") as Record<string, FieldMap> | undefined;
+    const defaultSegmentId = stored.get("defaultSegmentId") as string | undefined;
+    const defaultTopicId = stored.get("defaultTopicId") as string | undefined;
+    const fromAddress = stored.get("fromAddress") as string | undefined;
+    const replyTo = stored.get("replyTo") as string | undefined;
+    const siteUrl = stored.get("siteUrl") as string | undefined;
+    const logoUrl = stored.get("logoUrl") as string | undefined;
+    const senderAddress = stored.get("senderAddress") as string | undefined;
+    const accentColor = stored.get("accentColor");
+    const baseColor = stored.get("baseColor");
+    const footerText = stored.get("footerText") as string | undefined;
+    const showReadOnline = stored.get("showReadOnline");
     return {
         apiKey: typeof apiKey === "string" && apiKey !== "" ? apiKey : null,
         enabledCollections: Array.isArray(enabledCollections) ? enabledCollections : [],
