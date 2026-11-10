@@ -1,0 +1,54 @@
+{
+	"$schema": "./node_modules/@emdash-cms/plugin-cli/schemas/emdash-plugin.schema.json",
+
+	"slug": "resend-broadcasts",
+	"publisher": "did:plc:x2sbncxr6zmsqe3d7wfrvla4", // shepp.dev
+
+	"name": "Resend Broadcasts",
+	"description": "Send an approved email to a Resend segment when an entry is published. Unofficial; not affiliated with Resend.",
+
+	"license": "MIT",
+	"author": { "name": "Tom Sheppard" },
+	"security": { "email": "sheppardnexus@gmail.com" },
+
+	// Trust contract — what runtime APIs the plugin asks for.
+	// Changing these between releases requires a version bump because
+	// installed users have consented to the old contract.
+	//
+	// content:read    read the saved entry for the panel, hooks and the overview
+	// schema:read     list collections and detect the title/body/image fields
+	// network:request call the Resend API (api.resend.com) only
+	"capabilities": ["content:read", "network:request", "schema:read"],
+	"allowedHosts": ["api.resend.com"],
+
+	"storage": {
+		// One broadcast record per entry, keyed `${collection}:${entryId}`.
+		"broadcasts": {
+			"indexes": ["status", "updatedAt", ["status", "updatedAt"]]
+		}
+	},
+
+	"admin": {
+		"pages": [
+			{ "path": "/overview", "label": "Broadcasts", "icon": "envelope" },
+			{ "path": "/settings", "label": "Broadcast settings", "icon": "gear" }
+		],
+		// Only the API key is declared here so the host encrypts it at rest.
+		// Everything else is edited on the /settings page, which can load
+		// segments, topics and collection fields dynamically.
+		"settingsSchema": {
+			"apiKey": {
+				"type": "secret",
+				"label": "Resend API key",
+				"description": "Edit this on the Broadcast settings page."
+			}
+		},
+		"editorPanels": [
+			{
+				"id": "send-broadcast",
+				"title": "Send as broadcast",
+				"route": "editor/panel"
+			}
+		]
+	}
+}
