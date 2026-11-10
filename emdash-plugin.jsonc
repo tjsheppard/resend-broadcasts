@@ -8,6 +8,7 @@
 	"description": "Send an approved email to a Resend segment when an entry is published. Unofficial; not affiliated with Resend.",
 
 	"license": "MIT",
+	"repo": "https://github.com/tjsheppard/resend-broadcasts",
 	"author": { "name": "Tom Sheppard" },
 	"security": { "email": "sheppardnexus@gmail.com" },
 

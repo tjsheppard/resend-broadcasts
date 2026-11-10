@@ -11,7 +11,7 @@ The project isn't a git repository yet and has no GitHub remote, so that comes f
 ## 2. Put it in git and on GitHub
 
 - Run `git init`. `.gitignore` already excludes `node_modules` and `dist`.
-- Create a GitHub repo and set the `repository` URL, because release setup reads it.
+- Create a GitHub repo (done: `https://github.com/tjsheppard/resend-broadcasts`). Its URL is the `repo` field in `emdash-plugin.jsonc`, which release setup reads. Automated releases need the repo to be public.
 - Work on branches and open pull requests. Add a CI workflow that runs `pnpm install`, `pnpm run validate`, `pnpm run typecheck` and `pnpm run test`.
 
 ## 3. Publish to the EmDash registry
