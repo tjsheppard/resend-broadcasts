@@ -147,6 +147,12 @@ describe("email header", () => {
         expect(html).toContain("Acme &amp; Co<br>1 High St, &lt;London&gt;");
         expect(text).toContain("--\nAcme & Co\n1 High St, <London>\n\nYou are receiving");
     });
+
+    it("links the site name in the default footer line", () => {
+        const { html, text } = renderEmail(input());
+        expect(html).toMatch(/subscribed to <a href="https:\/\/example\.com\/"[^>]*>Example<\/a>\./);
+        expect(text).toContain("subscribed to Example (https://example.com/).");
+    });
 });
 
 describe("subject and preview text in the body", () => {

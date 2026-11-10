@@ -21,7 +21,6 @@ export async function loadSettings(ctx: PluginContext): Promise<Settings> {
     const defaultTopicId = stored.get("defaultTopicId") as string | undefined;
     const fromAddress = stored.get("fromAddress") as string | undefined;
     const replyTo = stored.get("replyTo") as string | undefined;
-    const siteUrl = stored.get("siteUrl") as string | undefined;
     const logoUrl = stored.get("logoUrl") as string | undefined;
     const senderAddress = stored.get("senderAddress") as string | undefined;
     const accentColor = stored.get("accentColor");
@@ -36,7 +35,6 @@ export async function loadSettings(ctx: PluginContext): Promise<Settings> {
         defaultTopicId: defaultTopicId || null,
         fromAddress: fromAddress ?? "",
         replyTo: replyTo ?? "",
-        siteUrl: siteUrl ?? "",
         logoUrl: logoUrl ?? "",
         senderAddress: senderAddress ?? "",
         accentColor: isAccentColor(accentColor) ? accentColor : DEFAULT_ACCENT,
@@ -46,9 +44,9 @@ export async function loadSettings(ctx: PluginContext): Promise<Settings> {
     };
 }
 
-/** The base URL used for links and images: the configured one, else the site's own. */
-export function effectiveSiteUrl(ctx: PluginContext, settings: Settings): string {
-    return (settings.siteUrl || ctx.site.url || "").replace(/\/+$/, "");
+/** The base URL used for links and images: the site URL from EmDash's general settings. */
+export function effectiveSiteUrl(ctx: PluginContext): string {
+    return (ctx.site.url || "").replace(/\/+$/, "");
 }
 
 export function clientFor(ctx: PluginContext, settings: Settings): ResendClient | null {

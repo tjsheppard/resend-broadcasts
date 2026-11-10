@@ -17,7 +17,6 @@ export interface Settings {
     defaultTopicId: string | null;
     fromAddress: string;
     replyTo: string;
-    siteUrl: string;
     logoUrl: string;
     senderAddress: string;
     /** Tailwind colour name (see palette.ts) for backgrounds, text and borders. */

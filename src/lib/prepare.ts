@@ -94,7 +94,7 @@ export async function prepare(
     const fieldMap = resolveFieldMap(collection, settings.fieldMaps[collection.slug]);
     const fields = readEntry(entry, fieldMap);
     const hash = await contentHash(entry, fieldMap);
-    const siteUrl = effectiveSiteUrl(ctx, settings);
+    const siteUrl = effectiveSiteUrl(ctx);
     const entryUrl = await resolveEntryUrl(ctx, collection, entry, siteUrl);
     const selection = await getSelection(ctx, collection.slug, entry.id);
 

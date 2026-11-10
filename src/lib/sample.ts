@@ -49,7 +49,7 @@ const SAMPLE_FIELDS: EntryFields = {
 
 /** Renders a fixed sample post with the saved appearance settings. */
 export function renderSample(ctx: PluginContext, settings: Settings): RenderResult {
-    const siteUrl = effectiveSiteUrl(ctx, settings);
+    const siteUrl = effectiveSiteUrl(ctx);
     return renderEmail({
         subject: SAMPLE_FIELDS.title,
         preheader: SAMPLE_FIELDS.excerpt,

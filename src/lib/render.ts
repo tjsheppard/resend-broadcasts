@@ -330,7 +330,7 @@ export function renderEmail(input: RenderInput): RenderResult {
     if (!fields.title) errors.push("The entry has no title.");
     if (!entryUrl && showReadOnline) {
         sendErrors.push(
-            "The entry has no public URL, so the email would have no “read on the web” link. Set the site URL in settings, and give the entry a slug in a collection with a URL pattern.",
+            "The entry has no public URL, so the email would have no “read on the web” link. Set the site URL in EmDash's general settings, and give the entry a slug in a collection with a URL pattern.",
         );
     }
 
@@ -386,11 +386,17 @@ export function renderEmail(input: RenderInput): RenderResult {
         ? `${addressLines.map(escapeHtml).join("<br>")}<br><br>`
         : "";
 
-    const footerReason = input.footerText?.trim() || `You are receiving this email because you subscribed to ${input.siteName}.`;
-    const footerReasonHtml = footerReason
-        .split(/\r?\n/)
-        .map((line) => escapeHtml(line.trim()))
-        .join("<br>");
+    const customFooter = input.footerText?.trim();
+    const footerReason = customFooter || `You are receiving this email because you subscribed to ${input.siteName}${siteLink ? ` (${siteLink})` : ""}.`;
+    const footerReasonHtml = customFooter
+        ? customFooter
+            .split(/\r?\n/)
+            .map((line) => escapeHtml(line.trim()))
+            .join("<br>")
+        : `You are receiving this email because you subscribed to ${siteLink
+            ? `<a href="${escapeHtml(siteLink)}" style="color:${theme.muted};">${escapeHtml(input.siteName)}</a>`
+            : escapeHtml(input.siteName)
+        }.`;
 
     const html = `<!doctype html>
 <html lang="en">

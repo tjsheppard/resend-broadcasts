@@ -9,7 +9,8 @@ reviewed and approved the exact email. Unofficial; not affiliated with Resend.
 1. Create a Resend API key (Full access, or one that can read segments and topics and send
    broadcasts). A sending-only key will be rejected with a clear message.
 2. Open **Broadcast settings** in the admin and enter the key, a verified From address, optional
-   Reply-To and site URL, a default segment/topic, and tick the collections that may send.
+   Reply-To, a default segment/topic, and tick the collections that may send. Links, images and the
+   footer's site name use the site name and URL from EmDash's general settings.
    Each enabled collection gets a card mapping its fields to Subject, Preview text (the grey snippet shown after the subject in an inbox) and Body. They are auto-detected and can be overridden; save each card separately.
    The **Email appearance** section has its own save button: an optional logo (a PNG or JPG; without one the header shows the site name), a base colour for backgrounds, text and borders (Tailwind Neutral, Stone, Zinc, Mauve, Olive, Mist or Taupe; default Zinc), an accent colour for links and the button (Tailwind Red through Slate; default Blue), the sender's postal address (shown in every email footer; many countries require it), a footer message that replaces the default "you subscribed" line, and a toggle for the "Read this on the web" link. Emails include dark-mode styles and an Outlook-safe button.
    Save the appearance, then use **Send preview email** below it to receive a sample post rendered with your saved settings.
@@ -19,13 +20,13 @@ reviewed and approved the exact email. Unofficial; not affiliated with Resend.
 
 - Choose segment, optional topic, subject and preview text (leave either empty to use the default shown
   in grey) and press **Save subject and preview text**. They appear in the inbox list only; switch on
-  **Show subject and preview text at the top of the email** to also put them at the top of the body
-  (the subject as a heading, the preview text beneath it). Use **Send test email** to see the real
-  email in your inbox. The full entry is always sent; at the first block that cannot be
-  rendered in email (embeds, custom components) the email stops and shows a **Continue reading on
-  the web** button.
-- Scheduled entry: **Schedule broadcast**. The email sends when the scheduler publishes the entry.
-- Published entry: **Send broadcast now** (with a confirmation) sends in one step.
+  **Show subject and preview text at the top of the email** (saves immediately) to also put them at
+  the top of the body (the subject as a heading, the preview text beneath it). The full entry is
+  always sent; at the first block that cannot be rendered in email (embeds, custom components) the
+  email stops and shows a **Continue reading on the web** button.
+- Step 1: **Send test email** (uses your saved choices) to see the real email in your inbox.
+- Step 2, scheduled entry: **Schedule broadcast**. The email sends when the scheduler publishes the entry.
+- Step 2, published entry: **Send broadcast now** (with a confirmation) sends in one step.
 - **Broadcasts** overview lists approved, sent, failed and lapsed broadcasts.
 
 ### Safety rules

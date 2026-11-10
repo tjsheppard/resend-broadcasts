@@ -131,6 +131,9 @@ async function runAction(
         case "topic":
             return saveAudience(env, action, value);
 
+        case "show_subject":
+            return saveShowSubject(env, value === true);
+
         case "revoke":
         case "change":
             await revokeApproval(ctx, collection.slug, entry.id);
@@ -207,13 +210,13 @@ async function saveChoices(env: PanelEnv, values: Record<string, unknown>): Prom
     if (!subject && !prep.defaultSubject) return fail("Enter a subject.");
     const preheader = str(values.preheader, 200);
 
-    const { segmentId, topicId } = prep.selection;
+    const { segmentId, topicId, showSubject } = prep.selection;
     const selection: Selection = {
         ...(segmentId !== undefined ? { segmentId } : {}),
         ...(topicId !== undefined ? { topicId } : {}),
         ...(subject && subject !== prep.defaultSubject ? { subject } : {}),
         ...(preheader && preheader !== prep.defaultPreheader ? { preheader } : {}),
-        ...(values.show_subject === true ? { showSubject: true } : {}),
+        ...(showSubject === true ? { showSubject: true } : {}),
     };
     await saveSelection(ctx, collection.slug, entry.id, selection);
     // Changing the choices invalidates any earlier approval.
@@ -237,6 +240,14 @@ async function saveAudience(env: PanelEnv, field: "segment" | "topic", value: un
     });
     await revokeApproval(ctx, collection.slug, entry.id);
     return ok(field === "segment" ? "Segment saved." : "Topic saved.");
+}
+
+async function saveShowSubject(env: PanelEnv, show: boolean): Promise<Toast> {
+    const { ctx, collection, entry } = env;
+    const { showSubject: _previous, ...rest } = await getSelection(ctx, collection.slug, entry.id);
+    await saveSelection(ctx, collection.slug, entry.id, { ...rest, ...(show ? { showSubject: true } : {}) });
+    await revokeApproval(ctx, collection.slug, entry.id);
+    return ok(show ? "The subject and preview text now head the email." : "The subject and preview text only show in the inbox list.");
 }
 
 function summary(record: BroadcastRecord): Block {
@@ -358,12 +369,11 @@ async function renderPanel(env: PanelEnv): Promise<Block[]> {
     const prep = await prepare(ctx, settings, collection, entry, lists);
     blocks.push(...audienceBlocks(env, prep, lists));
     blocks.push({ type: "divider" });
-    if (prep.render.errors.length === 0) {
-        blocks.push(testForm(env));
-        blocks.push({ type: "divider" });
-    }
     blocks.push(contentForm(prep));
+    blocks.push(showSubjectToggle(prep));
+    blocks.push({ type: "divider" });
     blocks.push(...emailBlocks(prep, env.entry.status));
+    if (prep.render.errors.length === 0) blocks.push(...testBlocks(env));
     blocks.push(...actionButtons(env, prep, record));
     return blocks;
 }
@@ -412,19 +422,41 @@ function audienceBlocks(env: PanelEnv, prep: Prepared, lists: AudienceLists): Bl
     ];
 }
 
-function testForm(env: PanelEnv): Block {
+function testBlocks(env: PanelEnv): Block[] {
+    return [
+        {
+            type: "context",
+            text: "Step 1: send yourself a test email. It uses your saved choices, so save any subject or preview text changes first.",
+        },
+        {
+            type: "form",
+            block_id: "test",
+            fields: [
+                {
+                    type: "text_input",
+                    action_id: "test_to",
+                    label: "Send a test email to",
+                    placeholder: env.user?.email ?? "name@example.com",
+                },
+            ],
+            submit: { label: "✉ Send test email", action_id: "test_email" },
+        },
+    ];
+}
+
+// Standalone, so it saves on change like the segment and topic selects; a toggle inside a form waits for the form's submit.
+function showSubjectToggle(prep: Prepared): Block {
     return {
-        type: "form",
-        block_id: "test",
-        fields: [
+        type: "actions",
+        block_id: "show_subject_toggle",
+        elements: [
             {
-                type: "text_input",
-                action_id: "test_to",
-                label: "Send a test email to",
-                placeholder: env.user?.email ?? "name@example.com",
+                type: "toggle",
+                action_id: "show_subject",
+                label: "Show subject and preview text at the top of the email",
+                initial_value: prep.selection.showSubject === true,
             },
         ],
-        submit: { label: "✉ Send test email", action_id: "test_email" },
     };
 }
 
@@ -447,13 +479,6 @@ function contentForm(prep: Prepared): Block {
                 placeholder: prep.defaultPreheader,
                 initial_value: prep.selection.preheader ?? "",
             },
-            {
-                type: "toggle",
-                action_id: "show_subject",
-                label: "Show subject and preview text at the top of the email",
-                description: "Off: they only appear in the inbox list. On: they also head the email body.",
-                initial_value: prep.selection.showSubject === true,
-            },
         ],
         submit: { label: "✓ Save subject and preview text", action_id: "save" },
     };
@@ -468,7 +493,6 @@ function emailBlocks(prep: Prepared, status: string | undefined): Block[] {
         blocks.push(banner(blockers.join(" "), "alert", "This email cannot be sent yet"));
     }
     for (const warning of prep.render.warnings) blocks.push(banner(warning, "default"));
-    blocks.push({ type: "context", text: "To see how the email looks, send yourself a test email." });
     return blocks;
 }
 
@@ -540,10 +564,13 @@ function actionButtons(env: PanelEnv, prep: Prepared, record: BroadcastRecord | 
     } else {
         blocks.push({
             type: "context",
-            text: `This entry is ${status === "scheduled" ? `scheduled${env.entry.scheduledAt ? ` for ${fmtTime(env.entry.scheduledAt)}` : ""}` : "published"}. Segment and topic save when you change them. Press “Save subject and preview text” after editing either.`,
+            text: `This entry is ${status === "scheduled" ? `scheduled${env.entry.scheduledAt ? ` for ${fmtTime(env.entry.scheduledAt)}` : ""}` : "published"}. Segment, topic and the subject toggle save when you change them. Press “Save subject and preview text” after editing either text box.`,
         });
     }
-    if (elements.length > 0) blocks.push({ type: "actions", elements });
+    if (elements.length > 0) {
+        blocks.push({ type: "context", text: "Step 2: when the test email looks right, send the broadcast." });
+        blocks.push({ type: "actions", elements });
+    }
     if ((status === "published" || status === "scheduled") && elements.length === 0) {
         const missing: string[] = [];
         if (!audience) missing.push("choose a segment above");
@@ -558,8 +585,8 @@ function actionButtons(env: PanelEnv, prep: Prepared, record: BroadcastRecord | 
             );
         }
     }
-    if (!effectiveSiteUrl(env.ctx, env.settings)) {
-        blocks.push(banner("No site URL is set, so links and images cannot be resolved. Set one in settings.", "alert"));
+    if (!effectiveSiteUrl(env.ctx)) {
+        blocks.push(banner("No site URL is set, so links and images cannot be resolved. Set one in EmDash's general settings.", "alert"));
     }
     return blocks;
 }

@@ -255,15 +255,15 @@ describe("approval and sending", () => {
 
 		expect(await sentHtml()).not.toContain("<h1");
 
-		await host.admin.submitEditorPanel(PANEL, "posts", id, "save", {
-			subject: "Custom subject",
-			preheader: "",
-			show_subject: true,
-		});
+		await host.admin.submitEditorPanel(PANEL, "posts", id, "save", { subject: "Custom subject", preheader: "" });
+		await host.admin.actEditorPanel(PANEL, "posts", id, "show_subject", { value: true });
 		expect(JSON.stringify(await host.admin.loadEditorPanel(PANEL, "posts", id))).toContain("show_subject");
 		expect(await sentHtml()).toMatch(/<h1[^>]*>Custom subject<\/h1>/);
 
-		await host.admin.submitEditorPanel(PANEL, "posts", id, "save", { subject: "Custom subject", preheader: "", show_subject: false });
+		await host.admin.submitEditorPanel(PANEL, "posts", id, "save", { subject: "Custom subject", preheader: "" });
+		expect(await sentHtml()).toMatch(/<h1[^>]*>Custom subject<\/h1>/);
+
+		await host.admin.actEditorPanel(PANEL, "posts", id, "show_subject", { value: false });
 		expect(await sentHtml()).not.toContain("<h1");
 	});
 });

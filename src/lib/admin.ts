@@ -122,17 +122,6 @@ async function saveSettings(ctx: PluginContext, values: Record<string, unknown>)
     if (from && !EMAIL_RE.test(from)) return fail("The From address must be an email, or Name <email>.");
     if (replyTo && !EMAIL_RE.test(replyTo)) return fail("The reply-to address must be an email, or Name <email>.");
 
-    let siteUrl = str(values.site_url, 500);
-    if (siteUrl) {
-        try {
-            const parsed = new URL(siteUrl);
-            if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error("protocol");
-            siteUrl = siteUrl.replace(/\/+$/, "");
-        } catch {
-            return fail("The site URL must be a full http(s) URL.");
-        }
-    }
-
     const enabled = Array.isArray(values.collections)
         ? values.collections.filter((v): v is string => typeof v === "string" && bySlug.has(v))
         : current.enabledCollections;
@@ -174,7 +163,6 @@ async function saveSettings(ctx: PluginContext, values: Record<string, unknown>)
     await ctx.settings.set("enabledCollections", enabled);
     await ctx.settings.set("fromAddress", from);
     await ctx.settings.set("replyTo", replyTo);
-    await ctx.settings.set("siteUrl", siteUrl);
     if (segmentId === null) await ctx.settings.delete("defaultSegmentId");
     else if (segmentId) await ctx.settings.set("defaultSegmentId", segmentId);
     if (topicId === null) await ctx.settings.delete("defaultTopicId");
@@ -373,13 +361,6 @@ async function settingsPage(
             action_id: "reply_to",
             label: "Reply-to address (optional)",
             initial_value: settings.replyTo,
-        },
-        {
-            type: "text_input",
-            action_id: "site_url",
-            label: "Site URL",
-            placeholder: ctx.site.url || "https://example.com",
-            initial_value: settings.siteUrl,
         },
     );
 

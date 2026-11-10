@@ -6,7 +6,7 @@ The project isn't a git repository yet and has no GitHub remote, so that comes f
 
 - To try it now, run `pnpm add file:/Users/tom/Documents/GitHub/resend-broadcasts` in the site. Import it and add it to `emdash({ sandboxed: [resendBroadcasts] })`.
 - A `file:` install only works on your machine, so it won't deploy from CI. For production, use the registry (step 3) or a git or tarball dependency.
-- On the live site, add the Resend API key in the plugin settings. Set the From address (the domain must be verified in Resend), the site URL, and the postal address. Enable your collections, then send a test email.
+- On the live site, add the Resend API key in the plugin settings. Set the From address (the domain must be verified in Resend), and the postal address. Enable your collections, then send a test email.
 
 ## 2. Put it in git and on GitHub
 
@@ -23,7 +23,7 @@ The project isn't a git repository yet and has no GitHub remote, so that comes f
 
 ## 4. Versioning and automated releases
 
-- `package.json` is the only version source, currently 0.3.3. Bump patch for fixes and minor for new features. You must bump it whenever capabilities, `allowedHosts` or storage change.
+- `package.json` is the only version source, currently 0.3.4. Bump patch for fixes and minor for new features. You must bump it whenever capabilities, `allowedHosts` or storage change.
 - For CI releases, run `pnpm run release:setup` after the repo is on GitHub. It writes `.github/workflows/emdash-release.yml`. Pick either trigger: Changesets (changelog and version PRs) or git tags.
 - Before the first release, open https://releases.emdashcms.com/publisher, sign in as `shepp.dev` and select **Authorize publishing**. Without it the workflow fails with `DELEGATION_REQUIRED`.
 - Tags suit a single-package plugin. Bump the version in a PR, merge it, then push a `resend-broadcasts@0.3.0` tag (`<slug>@<version>`; the workflow ignores `v0.3.0`) and the workflow publishes. The first automated release connects the repo to your publisher profile.
